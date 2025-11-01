@@ -1,0 +1,540 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ускорение доставки</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #fafafa;
+            color: #1a1a1a;
+            padding: 20px;
+            position: relative;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .header {
+            margin-bottom: 48px;
+            opacity: 0;
+            animation: fadeInDown 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 15px;
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        .button-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .delivery-button {
+            width: 100%;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 18px 32px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            letter-spacing: -0.01em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .delivery-button:hover:not(:disabled) {
+            background: #2d2d2d;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .delivery-button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .delivery-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .button-text {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .button-text.hidden {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        /* Loader */
+        .loader-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .loader-container.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Progress bar */
+        .progress-container {
+            margin-top: 24px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .progress-container.active {
+            opacity: 1;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1a1a1a 0%, #4b5563 100%);
+            border-radius: 2px;
+            transform: translateX(-100%);
+            animation: progress 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes progress {
+            to { transform: translateX(0); }
+        }
+
+        .progress-label {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        /* Success message */
+        .success-container {
+            display: none;
+            margin-top: 32px;
+            padding: 24px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .success-container.show {
+            display: block;
+            animation: successSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes successSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 16px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: successIconPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes successIconPop {
+            0% {
+                transform: scale(0) rotate(-180deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .success-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: white;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            stroke-dasharray: 29;
+            stroke-dashoffset: 29;
+            animation: checkmark 0.4s 0.3s ease-out forwards;
+        }
+
+        @keyframes checkmark {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .success-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .success-description {
+            font-size: 15px;
+            color: #6b7280;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .time-saved {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .time-number {
+            color: #10b981;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        /* Copyright */
+        .copyright {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 13px;
+            color: #9ca3af;
+            font-weight: 400;
+            text-align: center;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            opacity: 0;
+            animation: fadeInUp 0.6s 0.8s ease-out forwards;
+            z-index: 1000;
+            letter-spacing: -0.01em;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 10px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        .copyright-symbol {
+            display: inline-block;
+            margin: 0 2px;
+            font-weight: 500;
+        }
+
+        .copyright-author {
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Subtle animation on page load */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .container {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .delivery-button {
+                font-size: 15px;
+                padding: 16px 28px;
+            }
+
+            .copyright {
+                font-size: 11px;
+                padding: 10px 20px;
+                bottom: 16px;
+                max-width: calc(100% - 40px);
+                line-height: 1.4;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .copyright {
+                font-size: 10px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Управление доставкой</h1>
+            <p>Оптимизируйте время получения вашего заказа</p>
+        </div>
+
+        <div class="button-wrapper">
+            <button class="delivery-button" id="deliveryBtn">
+                <span class="button-text" id="buttonText">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13"></rect>
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                    </svg>
+                    Ускорить поставку товара
+                </span>
+                <div class="loader-container" id="loader">
+                    <div class="spinner"></div>
+                    <span class="loader-text">Оптимизация маршрута</span>
+                </div>
+            </button>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-label">Перерасчет времени доставки...</div>
+        </div>
+
+        <div class="success-container" id="successMessage">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+            <div class="success-title">Доставка ускорена!</div>
+            <div class="success-description">
+                Мы оптимизировали маршрут и сократили время доставки
+            </div>
+            <div class="time-saved">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Экономия: <span class="time-number">20</span> минут</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copyright -->
+    <footer class="copyright">
+        Система ускорения поставки товара <span class="copyright-symbol">©</span> <span class="copyright-author">Муреев Дмитрий</span> 2025
+    </footer>
+
+    <script>
+        const btn = document.getElementById('deliveryBtn');
+        const buttonText = document.getElementById('buttonText');
+        const loader = document.getElementById('loader');
+        const progressContainer = document.getElementById('progressContainer');
+        const successMessage = document.getElementById('successMessage');
+
+        let isProcessing = false;
+
+        btn.addEventListener('click', function(e) {
+            if (isProcessing) return;
+
+            isProcessing = true;
+            btn.disabled = true;
+
+            // Создаем частицы при клике
+            createParticles(e);
+
+            // Скрываем текст кнопки, показываем лоадер
+            buttonText.classList.add('hidden');
+            setTimeout(() => {
+                buttonText.style.display = 'none';
+                loader.classList.add('active');
+            }, 300);
+
+            // Показываем прогресс бар
+            setTimeout(() => {
+                progressContainer.classList.add('active');
+            }, 400);
+
+            // Через 2.5 секунды показываем результат
+            setTimeout(() => {
+                loader.classList.remove('active');
+                progressContainer.classList.remove('active');
+
+                setTimeout(() => {
+                    successMessage.classList.add('show');
+
+                    // Сброс через 5 секунд
+                    setTimeout(() => {
+                        resetButton();
+                    }, 5000);
+                }, 300);
+            }, 2500);
+        });
+
+        function createParticles(e) {
+            const colors = ['#1a1a1a', '#4b5563', '#10b981'];
+            const particleCount = 12;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.cssText = `
+                    left: ${e.clientX}px;
+                    top: ${e.clientY}px;
+                    width: ${Math.random() * 8 + 4}px;
+                    height: ${Math.random() * 8 + 4}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: 50%;
+                    --tx: ${(Math.random() - 0.5) * 200}px;
+                    --ty: ${(Math.random() - 0.5) * 200}px;
+                    animation: particleFloat ${Math.random() * 0.5 + 0.8}s ease-out forwards;
+                `;
+
+                document.body.appendChild(particle);
+
+                setTimeout(() => {
+                    particle.remove();
+                }, 1300);
+            }
+        }
+
+        function resetButton() {
+            successMessage.classList.remove('show');
+
+            setTimeout(() => {
+                buttonText.style.display = 'inline-flex';
+                buttonText.classList.remove('hidden');
+                btn.disabled = false;
+                isProcessing = false;
+            }, 300);
+        }
+
+        // Добавляем hover эффект с легкой анимацией
+        btn.addEventListener('mouseenter', function() {
+            if (!isProcessing) {
+                this.style.transform = 'translateY(-2px)';
+            }
+        });
+
+        btn.addEventListener('mouseleave', function() {
+            if (!isProcessing) {
+                this.style.transform = 'translateY(0)';
+            }
+        });
+    </script>
+</body>
+</html>
